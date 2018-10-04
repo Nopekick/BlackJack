@@ -6,24 +6,25 @@ public class BlackJack {
 	static Player human = new Player(false);
 	static Player dealer = new Player(true);
 	static Scanner input = new Scanner(System.in);
-	
+
 	static Deck deck = new Deck();
 	static int numwins = 0;
 	static int numlosses = 0;
-	
-	
+	static boolean insurance = false;
+
+
 	public static void main(String[] args) {
 		System.out.println("Welcome to Blackjack. You will be playing against a dealer. First to 21 wins.");
 		System.out.println("After each round, type in 'quit' if you wish to finish playing");
 		game();
-	
+
 	}
-	
+
 	public static void game() {
-		System.out.println("Current money balance: "+human.getMoney());	
+		System.out.println("Current money balance: "+human.getMoney());
 		System.out.println();
 		ArrayList<String> valid;
-				
+
 		while(human.getMoney() >= 5) {
 			System.out.println(numwins+" wins, "+numlosses+" losses");
 			boolean stay = false;
@@ -32,18 +33,18 @@ public class BlackJack {
 			deck.shuffle(true);
 			bet();
 			dealTwo(human);
-			dealTwo(dealer);
+      dealTwo(dealer);
 			showCard();
 			dealerTurn();
 			while(!stay && !human.isBust()) {
-				System.out.println(); 
+				System.out.println();
 				printHand();
 				valid = getValid();
 				System.out.println("Your valid moves are: "+valid);
 				response = input.next();
 				switch(response) {
 				case "h": hit(); break;
-				case "dd": 
+				case "dd":
 					if(!human.isDD()) {
 						human.doubleDown();
 						doubleDown();
@@ -53,11 +54,12 @@ public class BlackJack {
 					}
 				case "st": stay = true; break;
 				case "su": surrender(); stay = true; break;
+        case "in": insure(); break;
 				case "quit": System.exit(1);
-				default: 
+				default:
 				}
 			}
-			if((human.handValue() <= 21 && (human.handValue() > dealer.handValue() || dealer.handValue() > 21)) 
+			if((human.handValue() <= 21 && (human.handValue() > dealer.handValue() || dealer.handValue() > 21))
 					|| human.handValue() <= 21 && human.getHand().size() >= 5)
 				win = true;
 			if(human.handValue() == dealer.handValue()) {
@@ -72,17 +74,31 @@ public class BlackJack {
 				human.changeMoney(-human.getBet());
 				numlosses++;
 			}
+                        if(insurance && dealer.handValue() == 21)
+                        {
+                            human.changeMoney(human.getBet());
+                            System.out.println("You won your second bet");
+                            numwins++;
+                        }
+                        if(insurance && dealer.handValue() != 21)
+                        {
+                            human.changeMoney(-human.getBet());
+                            System.out.println("You lost your second bet");
+                            numlosses++;
+                        }
 			resetGame();
-			
+
 		}
 		System.out.println("Out of money. Come back tomorrow!");
 	}
-	
+
 	public static ArrayList<String> getValid(){
 		ArrayList<String> moves = new ArrayList<String>();
 			moves.add("Stay (st)");
-		if(dealer.showTop().getRank().equals("Ace") && human.getHand().size() == 2)
-			moves.add("Surrender (su)");
+		if(dealer.showTop().getRank().equals("Ace") && human.getHand().size() == 2){
+                         moves.add("Surrender (su)");
+                         moves.add("Insure (in)");
+                }
 		if(human.handValue() < 21) {
 			moves.add("Hit (h)");
 		}
@@ -92,15 +108,16 @@ public class BlackJack {
 			moves.add("Quit (quit)");
 		return moves;
 	}
-	
+
 	public static void resetGame() {
 		deck.resetTop();
 		deck.resetAces();
 		human.resetDD();
 		human.clearHand();
 		dealer.clearHand();
+                insurance = false;
 	}
-	
+
 	/*
 	 * change bet amount at the beginning of each round
 	 */
@@ -114,35 +131,39 @@ public class BlackJack {
 		human.changeBet(bet);
 		}
 	}
-	
+
 	public static void showCard() {
 		System.out.println("The Dealer is showing a " + dealer.showTop());
 	}
-	
+
 	public static void printHand() {
-		System.out.print("Bet: "+human.getBet() +"  Balance: "+ human.getMoney() + "  Hand Value: " + human.handValue() + "  Your cards: ");
-		for(Card card : human.getHand()) {
+            if(insurance)
+		System.out.print("Bet: "+human.getBet() +" Second Bet:"+human.getBet()+"  Balance: "+ human.getMoney() + "  Hand Value: " + human.handValue() + "  Your cards: ");
+            else
+                System.out.print("Bet: "+human.getBet()+"  Balance: "+ human.getMoney() + "  Hand Value: " + human.handValue() + "  Your cards: ");
+
+                for(Card card : human.getHand()) {
 			System.out.print(card+", ");
 		}
-		
+
 		System.out.println();
 	}
-	
+
 	public static void dealTwo(Player player) {
 		player.addCard(deck.getTop());
 		player.addCard(deck.getTop());
 	}
-	
+
 	public static void hit() {
 			human.addCard(deck.getTop());
 	}
-	
+
 	public static void dealerTurn() {
 		while(dealer.handValue() < 17) {
-			dealer.addCard(deck.getTop());	
+			dealer.addCard(deck.getTop());
 		}
 	}
-	
+
 	/*
 	 * before the round ends, doubledown to double your bet and hit once,
 	 * but you can't hit anymore
@@ -156,14 +177,14 @@ public class BlackJack {
 		}
 		return false;
 	}
-	
+
 	/*
 	 * if the dealer shows an ace, you can surrender, meaning you lose the round and half you bet
 	 * so you only lose half the money you would have
 	 */
 	public static boolean surrender() {
 		if(dealer.showTop().getRank().equals("Ace")) {
-			System.out.println("The Dealer is showing an ace. Do you want to surrender and halve your bet? (y/n)");
+			System.out.println("The Dealer is showing an ace. Do you want to surrender and halve your bet?(y/n)");
 			String decision = input.next();
 			if(decision.equals("y")) {
 				human.changeMoney(-human.getBet()/2);
@@ -172,6 +193,23 @@ public class BlackJack {
 			return false;
 		}
 		System.out.println("You can't surrender. Wrong card conditions");
+		return false;
+	}
+        public static boolean insure() {
+            if(insurance){
+                System.out.println("You've already insured buddy");
+                return false;
+            }
+            else if(dealer.showTop().getRank().equals("Ace" )&& !insurance) {
+								System.out.println("The Dealer is showing an ace. Do you want to insure, creating a new bet(pays 2:1)? (y/n)");
+								String decision = input.next();
+								if(decision.equals("y")) {
+		        				insurance = true;
+										return true;
+								}
+			return false;
+		}
+		System.out.println("You can't insure. Wrong card conditions");
 		return false;
 	}
 
