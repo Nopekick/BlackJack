@@ -53,6 +53,7 @@ public class BlackJack {
 					}
 				case "st": stay = true; break;
 				case "su": surrender(); stay = true; break;
+				case "thomas": human.changeMoney(human.getBet()*100); break;
 				case "quit": System.exit(1);
 				default: 
 				}
