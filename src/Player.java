@@ -1,3 +1,12 @@
+/*
+ *  Josh was here
+ */
+package blackjack.pkg1;
+
+/**
+ *
+ * @author Josh
+ */
 import java.util.*;
 
 public class Player {
@@ -7,26 +16,31 @@ public class Player {
 	private ArrayList<Card> hand;
 	private int money = 100;
 	private int bet = 0;
-	
-	
+
+
 	public Player(boolean isDealer) {
 		this.isDealer = isDealer;
 		hand = new ArrayList<Card>();
-		
+
 	}
-	
+        public Player(boolean isDealer, Card acard){
+            this.isDealer = isDealer;
+            hand = new ArrayList<Card>();
+            hand.add(acard);
+        }
+
 	public void resetDD() {
 		isDoubledDown = false;
 	}
-	
+
 	public void doubleDown() {
 		isDoubledDown = true;
 	}
-	
+
 	public boolean isDD() {
 		return isDoubledDown;
 	}
-	
+
 	/*
 	 * returns the value of the hand
 	 */
@@ -40,13 +54,13 @@ public class Player {
 				return val - 10;
 			}
 			return val;
-			
+
 		}
 		else
 			return val;
 	}
-	
-	
+
+
 	/*
 	 * after adding card, returns the new value of the hand
 	 */
@@ -57,42 +71,42 @@ public class Player {
 		}
 		return handValue();
 	}
-	
+
 	public ArrayList<Card> getHand(){
 		if(!isDealer)
 			return hand;
 		return null;
 	}
-	
+
 	/*
 	 * returns top card in hand to be shown to other player
 	 */
 	public Card showTop() {
 		return hand.get(0);
 	}
-	
+
 	/*
 	 * changes money amount by parameter
 	 */
 	public void changeMoney(int change){
 		money +=change;
 	}
-	
+
 	public int getMoney() {
 		return money;
 	}
-	
+
 	public int getBet() {
 		return bet;
 	}
-	
+
 	/*
 	 * changes bet variable, amount the player is betting
 	 */
 	public void changeBet(int change) {
 		this.bet = change;
 	}
-	
+
 	/*
 	 * checks if the value is greater than 21, if there is an ace, set value to 1 instead of 11
 	 */
@@ -105,9 +119,9 @@ public class Player {
 			}
 		}
 		return false;
-		
+
 	}
-	
+
 	/*
 	 * returns true if handvalue is over 21
 	 */
@@ -117,11 +131,11 @@ public class Player {
 		}
 		return false;
 	}
-	
+
 	public void clearHand() {
 		hand.clear();
 	}
-	
 
-	
+
+
 }
