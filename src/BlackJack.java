@@ -1,4 +1,12 @@
+/*
+ *  Josh was here
+ */
+package blackjack.pkg1;
 
+/**
+ *
+ * @author Josh
+ */
 import java.util.*;
 
 public class BlackJack {
@@ -6,24 +14,25 @@ public class BlackJack {
 	static Player human = new Player(false);
 	static Player dealer = new Player(true);
 	static Scanner input = new Scanner(System.in);
-	
+
 	static Deck deck = new Deck();
 	static int numwins = 0;
 	static int numlosses = 0;
-	
-	
+        static boolean clone = false;
+
+
 	public static void main(String[] args) {
 		System.out.println("Welcome to Blackjack. You will be playing against a dealer. First to 21 wins.");
 		System.out.println("After each round, type in 'quit' if you wish to finish playing");
 		game();
-	
+
 	}
-	
+
 	public static void game() {
-		System.out.println("Current money balance: "+human.getMoney());	
+		System.out.println("Current money balance: "+human.getMoney());
 		System.out.println();
 		ArrayList<String> valid;
-				
+
 		while(human.getMoney() >= 5) {
 			System.out.println(numwins+" wins, "+numlosses+" losses");
 			boolean stay = false;
@@ -36,14 +45,14 @@ public class BlackJack {
 			showCard();
 			dealerTurn();
 			while(!stay && !human.isBust()) {
-				System.out.println(); 
+				System.out.println();
 				printHand();
 				valid = getValid();
 				System.out.println("Your valid moves are: "+valid);
 				response = input.next();
 				switch(response) {
 				case "h": hit(); break;
-				case "dd": 
+				case "dd":
 					if(!human.isDD()) {
 						human.doubleDown();
 						doubleDown();
@@ -53,11 +62,12 @@ public class BlackJack {
 					}
 				case "st": stay = true; break;
 				case "su": surrender(); stay = true; break;
+                                 case "sp": split(); break;
 				case "quit": System.exit(1);
-				default: 
+				default:
 				}
 			}
-			if((human.handValue() <= 21 && (human.handValue() > dealer.handValue() || dealer.handValue() > 21)) 
+			if((human.handValue() <= 21 && (human.handValue() > dealer.handValue() || dealer.handValue() > 21))
 					|| human.handValue() <= 21 && human.getHand().size() >= 5)
 				win = true;
 			if(human.handValue() == dealer.handValue()) {
@@ -73,11 +83,11 @@ public class BlackJack {
 				numlosses++;
 			}
 			resetGame();
-			
+
 		}
 		System.out.println("Out of money. Come back tomorrow!");
 	}
-	
+
 	public static ArrayList<String> getValid(){
 		ArrayList<String> moves = new ArrayList<String>();
 			moves.add("Stay (st)");
@@ -86,13 +96,17 @@ public class BlackJack {
 		if(human.handValue() < 21) {
 			moves.add("Hit (h)");
 		}
+                if(human.getHand().size() == 2)
+                {
+                    moves.add("Sp (sp)");
+                }
 		if(!human.isDD() && human.handValue() < 21) {
 			moves.add("Double down (dd)");
 		}
 			moves.add("Quit (quit)");
 		return moves;
 	}
-	
+
 	public static void resetGame() {
 		deck.resetTop();
 		deck.resetAces();
@@ -100,7 +114,7 @@ public class BlackJack {
 		human.clearHand();
 		dealer.clearHand();
 	}
-	
+
 	/*
 	 * change bet amount at the beginning of each round
 	 */
@@ -114,35 +128,42 @@ public class BlackJack {
 		human.changeBet(bet);
 		}
 	}
-	
+
 	public static void showCard() {
 		System.out.println("The Dealer is showing a " + dealer.showTop());
 	}
-	
+
 	public static void printHand() {
 		System.out.print("Bet: "+human.getBet() +"  Balance: "+ human.getMoney() + "  Hand Value: " + human.handValue() + "  Your cards: ");
 		for(Card card : human.getHand()) {
 			System.out.print(card+", ");
 		}
-		
+
 		System.out.println();
 	}
-	
+
 	public static void dealTwo(Player player) {
 		player.addCard(deck.getTop());
 		player.addCard(deck.getTop());
 	}
-	
+
 	public static void hit() {
 			human.addCard(deck.getTop());
 	}
-	
+
+        public static void split(){
+            if(clone)
+            {
+                Player clone = new Player(false,human.getHand().get(0));
+            }
+        }
+
 	public static void dealerTurn() {
 		while(dealer.handValue() < 17) {
-			dealer.addCard(deck.getTop());	
+			dealer.addCard(deck.getTop());
 		}
 	}
-	
+
 	/*
 	 * before the round ends, doubledown to double your bet and hit once,
 	 * but you can't hit anymore
@@ -156,7 +177,7 @@ public class BlackJack {
 		}
 		return false;
 	}
-	
+
 	/*
 	 * if the dealer shows an ace, you can surrender, meaning you lose the round and half you bet
 	 * so you only lose half the money you would have
